@@ -3,6 +3,7 @@ export function openOrDownloadPdf(pdfBlob, mode = "download", fileName = "docume
   const url = window.URL.createObjectURL(blob);
 
   if (mode === "preview") {
+
     // Open in new tab
     const newTab = window.open(url, "_blank");
 

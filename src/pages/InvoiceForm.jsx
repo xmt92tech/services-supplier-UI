@@ -145,15 +145,15 @@ export default function InvoiceForm() {
     //console.log(payload);
 
     // Now just send payload
-    const response = await generateInvoice(payload);
+    const {response, invoiceId} = await generateInvoice(payload);
 
     // Successful PDF response
     if (response.headers["content-type"]?.includes("application/pdf")) {
       const pdfBlob = response.data;
 
-      console.log("Invoice generated successfully");
+      console.log(invoiceId + " Invoice generated successfully");
 
-      openOrDownloadPdf(pdfBlob, mode, "invoice.pdf");
+      openOrDownloadPdf(pdfBlob, mode, `${invoiceId}.pdf`);
       return;
     }
 
@@ -378,7 +378,7 @@ export default function InvoiceForm() {
           </button> */}
 
           <button
-            onClick={() => handleGenerate("preview")}
+            onClick={() => handleGenerate("download")}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             Generate Invoice
