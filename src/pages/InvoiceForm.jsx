@@ -114,8 +114,9 @@ export default function InvoiceForm() {
   //     alert("Error generating invoice");
   //   }
   // };
-
+  
   const handleGenerate = async (mode = "download") => {
+  let statusRes;
   try {
     const company = companies.find((c) => String(c.id) === selectedCompanyId);
     const customer = selectedCustomer;
@@ -141,14 +142,49 @@ export default function InvoiceForm() {
       })),
     };
 
-    console.log(payload);
+    //console.log(payload);
 
     // Now just send payload
-    const pdfBlob = await generateInvoice(payload);
-    openOrDownloadPdf(pdfBlob, mode, `invoice.pdf`);
+    const response = await generateInvoice(payload);
+
+    // Successful PDF response
+    if (response.headers["content-type"]?.includes("application/pdf")) {
+      const pdfBlob = response.data;
+
+      console.log("Invoice generated successfully");
+
+      openOrDownloadPdf(pdfBlob, mode, "invoice.pdf");
+      return;
+    }
+
+    throw new Error("Unexpected API response");
+
   } catch (err) {
-    console.error(err);
-    alert("Error generating invoice");
+    // console.error(err.response?.data?.error);
+    // alert("Error generating invoice");
+    let errorMessage = "Error generating invoice";
+
+    // Extract backend error message from Blob
+    if (err.response?.data instanceof Blob) {
+      try {
+        const errorData = JSON.parse(
+          await err.response.data.text()
+        );
+
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // Keep default error message
+      }
+    } else {
+      errorMessage =
+        err.response?.data?.error ||
+        err.message ||
+        errorMessage;
+    }
+
+    console.error("Invoice Error:", errorMessage);
+
+    alert(errorMessage);
   }
 };
 
@@ -334,18 +370,18 @@ export default function InvoiceForm() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 mt-4">
-          <button
+          {/* <button
             onClick={() => handleGenerate("preview")}
             className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
           >
             Preview Invoice
-          </button>
+          </button> */}
 
           <button
-            onClick={() => handleGenerate("download")}
+            onClick={() => handleGenerate("preview")}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Download Invoice
+            Generate Invoice
           </button>
         </div>
       </div>

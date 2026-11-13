@@ -17,8 +17,7 @@ export async function generateInvoice(payload) {
   const response = await api.post("/invoices/generate", payload, {
     responseType: "blob", // we expect a PDF
   });
-
-  return response.data; // return blob data
+  return response// return blob data
 }
 
 export const getInvoiceList = async (data) => {
